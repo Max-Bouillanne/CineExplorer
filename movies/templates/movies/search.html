@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>CineExplorer - Recherche</title>
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --bg-dark: #0f111a;
+            --card-dark: #1a1d2b;
+            --surface-light: #25293a;
+            --accent-blue: #3f51b5;
+            --accent-orange: #f39c12;
+            --text-main: #e2e8f0;
+            --text-dim: #94a3b8;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar-nav {
+            width: var(--sidebar-width);
+            background: var(--card-dark);
+            border-right: 1px solid #2d3748;
+            padding: 40px 25px;
+            position: fixed;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .sidebar-nav h2 {
+            font-size: 1.4rem;
+            color: #fff;
+            margin-bottom: 50px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-menu { list-style: none; padding: 0; }
+        .nav-item { margin-bottom: 15px; }
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            padding: 14px 18px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            background: rgba(63, 81, 181, 0.1);
+            color: var(--accent-blue);
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 60px;
+            max-width: 1200px;
+        }
+
+        .search-header {
+            margin-bottom: 50px;
+        }
+
+        .search-header h1 {
+            font-size: 1.8rem;
+            color: #fff;
+            margin-bottom: 30px;
+        }
+
+        .search-input-container {
+            background: var(--card-dark);
+            border: 1px solid #2d3748;
+            padding: 15px 25px;
+            border-radius: 30px;
+            display: flex;
+            gap: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .search-input-container input {
+            background: transparent;
+            border: none;
+            color: #fff;
+            outline: none;
+            width: 100%;
+            font-size: 1rem;
+        }
+
+        .results-flex {
+            display: flex;
+            gap: 40px;
+        }
+
+        .result-panel {
+            background: var(--card-dark);
+            border-radius: 20px;
+            padding: 35px;
+            flex: 1;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .result-panel h3 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #2d3748;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .result-count {
+            background: var(--surface-light);
+            padding: 2px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+        }
+
+        .result-item {
+            display: block;
+            text-decoration: none;
+            color: var(--text-main);
+            padding: 20px;
+            background: var(--surface-light);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .result-item:hover {
+            transform: translateX(8px);
+            background: #2d324a;
+        }
+
+        .result-item.movie:hover { border-left-color: var(--accent-blue); }
+        .result-item.person:hover { border-left-color: var(--accent-orange); }
+
+        .item-title {
+            display: block;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .meta {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+
+        .empty-msg {
+            color: var(--text-dim);
+            font-style: italic;
+            text-align: center;
+            padding: 30px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar-nav">
+        <h2>🎬 CineExplorer</h2>
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="{% url 'home' %}" class="nav-link">🏠 Dashboard</a></li>
+            <li class="nav-item"><a href="{% url 'movies' %}" class="nav-link">📂 Catalogue</a></li>
+            <li class="nav-item"><a href="{% url 'search' %}" class="nav-link" style="color: var(--accent-blue); background: rgba(63, 81, 181, 0.1);">🔍 Recherche</a></li>
+            <li class="nav-item"><a href="{% url 'stats' %}" class="nav-link">📊 Statistiques</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        
+        <div class="search-header">
+            <h1>Résultats pour <span style="color: var(--accent-orange);">"{{ query }}"</span></h1>
+            <form method="GET" action="{% url 'search' %}" class="search-input-container">
+                <span style="opacity: 0.5;">🔍</span>
+                <input type="text" name="q" value="{{ query }}" placeholder="Nouvelle recherche...">
+            </form>
+        </div>
+
+        <div class="results-flex">
+            <div class="result-panel">
+                <h3>🎬 Films <span class="result-count">{{ movies|length }}</span></h3>
+                {% for movie in movies %}
+                    <a href="{% url 'movie_detail' movie.mid %}" class="result-item movie">
+                        <span class="item-title">{{ movie.primaryTitle }}</span>
+                        <span class="meta">{{ movie.startYear|default:"?" }} • {{ movie.titleType|capfirst }}</span>
+                    </a>
+                {% empty %}
+                    <p class="empty-msg">Aucun film trouvé.</p>
+                {% endfor %}
+            </div>
+
+            <div class="result-panel">
+                <h3>👤 Personnes <span class="result-count">{{ persons|length }}</span></h3>
+                {% for person in persons %}
+                    <div class="result-item person">
+                        <span class="item-title">{{ person.primaryName }}</span>
+                        <span class="meta">Né en {{ person.birthYear|default:"?" }}</span>
+                    </div>
+                {% empty %}
+                    <p class="empty-msg">Aucune personne trouvée.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+    </main>
+</body>
+</html>

@@ -1,0 +1,4 @@
+data/mongo/
+data/imdb.db
+data/csv/*.csv
+data/db.sqlite3

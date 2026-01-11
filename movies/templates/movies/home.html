@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>CineExplorer - Dashboard</title>
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --bg-dark: #0f111a;
+            --card-dark: #1a1d2b;
+            --accent: #3f51b5;
+            --accent-soft: rgba(63, 81, 181, 0.1);
+            --text-main: #e2e8f0;
+            --text-dim: #94a3b8;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--card-dark);
+            border-right: 1px solid #2d3748;
+            padding: 40px 25px; 
+            position: fixed;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .sidebar h2 {
+            font-size: 1.4rem;
+            color: #fff;
+            margin-bottom: 50px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: 1px;
+        }
+
+        .nav-menu { list-style: none; padding: 0; }
+        .nav-item { margin-bottom: 15px; }
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            padding: 14px 18px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .nav-link:hover {
+            background: var(--accent-soft);
+            color: var(--accent);
+            transform: translateX(5px);
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 60px;
+            max-width: 1200px;
+        }
+
+        .header-search {
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 60px;
+        }
+
+        .search-box {
+            background: var(--card-dark);
+            border: 1px solid #2d3748;
+            padding: 12px 25px;
+            border-radius: 30px; 
+            width: 450px;
+            display: flex;
+            gap: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        
+        .search-box input {
+            background: transparent;
+            border: none;
+            color: #fff;
+            outline: none;
+            width: 100%;
+            font-size: 0.95rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 35px;
+            margin-bottom: 60px;
+        }
+
+        .stat-card {
+            background: var(--card-dark);
+            padding: 30px;
+            border-radius: 20px;
+            border-bottom: 4px solid var(--accent);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        
+        .stat-val { font-size: 2.2rem; font-weight: bold; display: block; margin-top: 10px; color: #fff; }
+        .stat-label { color: var(--text-dim); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
+
+        .content-flex {
+            display: flex;
+            gap: 45px;
+        }
+
+        .panel {
+            background: var(--card-dark);
+            border-radius: 20px;
+            padding: 35px;
+            flex: 1;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .panel-title {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            color: #fff;
+            border-left: 4px solid #f39c12;
+            padding-left: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table td {
+            padding: 18px 10px;
+            border-bottom: 1px solid #2d3748;
+            font-size: 0.95rem;
+        }
+
+        .discover-list { display: flex; flex-direction: column; gap: 20px; }
+        
+        .discover-item {
+            background: #25293a;
+            padding: 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text-main);
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        
+        .discover-item:hover { 
+            transform: translateY(-3px); 
+            background: #2d324a;
+            border-color: #f39c12;
+        }
+
+        .badge-rating {
+            background: #f39c12;
+            color: #000;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <h2>🎬 CineExplorer</h2>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="{% url 'home' %}" class="nav-link" style="color: var(--accent); background: var(--accent-soft);">
+                    🏠 Dashboard
+                </a>
+            </li>
+            <li class="nav-item"><a href="{% url 'movies' %}" class="nav-link">📂 Catalogue</a></li>
+            <li class="nav-item"><a href="{% url 'search' %}" class="nav-link">🔍 Recherche</a></li>
+            <li class="nav-item"><a href="{% url 'stats' %}" class="nav-link">📊 Statistiques</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        
+        <header class="header-search">
+            <form method="POST" class="search-box">
+                {% csrf_token %}
+                <span style="opacity: 0.5;">🔍</span>
+                <input type="text" name="mid" placeholder="Rechercher un film, un acteur ou un mid...">
+            </form>
+        </header>
+
+        <div class="dashboard-grid">
+            <div class="stat-card" style="border-color: #3f51b5;">
+                <span class="stat-label">Base de données (Mongo)</span>
+                <span class="stat-val">{{ total_films }}</span>
+                <span style="color:var(--text-dim); font-size: 0.75rem;">Films enregistrés</span>
+            </div>
+            <div class="stat-card" style="border-color: #f39c12;">
+                <span class="stat-label">Casting (SQL)</span>
+                <span class="stat-val">{{ total_acteurs }}</span>
+                <span style="color:var(--text-dim); font-size: 0.75rem;">Acteurs & Actrices</span>
+            </div>
+            <div class="stat-card" style="border-color: #27ae60;">
+                <span class="stat-label">Production</span>
+                <span class="stat-val">{{ total_producteurs }}</span>
+                <span style="color:var(--text-dim); font-size: 0.75rem;">Producteurs exécutifs</span>
+            </div>
+        </div>
+
+        <div class="content-flex">
+            <div class="panel" style="flex: 1.5;">
+                <h3 class="panel-title">Classement IMDb</h3>
+                <table class="data-table">
+                    {% for item in top_movies %}
+                    <tr>
+                        <td style="color: var(--text-dim); width: 50px; font-weight: bold;">#{{ forloop.counter }}</td>
+                        <td>
+                            <a href="{% url 'movie_detail' item.mid.mid %}" style="color: var(--text-main); text-decoration: none; font-weight: 500;">
+                                {{ item.mid.primarytitle }}
+                            </a>
+                        </td>
+                        <td style="text-align: right;"><span class="badge-rating">{{ item.averagerating }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+
+            <div class="panel">
+                <h3 class="panel-title">Suggestion</h3>
+                <div class="discover-list">
+                    {% for movie in random_movies %}
+                    <a href="{% url 'movie_detail' movie.mid %}" class="discover-item">
+                        <div style="font-weight: bold; margin-bottom: 6px; font-size: 1.05rem;">{{ movie.primarytitle }}</div>
+                        <div style="font-size: 0.85rem; color: var(--text-dim); display: flex; justify-content: space-between;">
+                            <span>Année: {{ movie.startyear }}</span>
+                            <span style="color: var(--accent);">Détails →</span>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    </main>
+</body>
+</html>

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>CineExplorer - {{ movie.primaryTitle }}</title>
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --bg-dark: #0f111a;
+            --card-dark: #1a1d2b;
+            --surface-light: #25293a;
+            --accent-blue: #3f51b5;
+            --accent-orange: #f39c12;
+            --text-main: #e2e8f0;
+            --text-dim: #94a3b8;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar-nav {
+            width: var(--sidebar-width);
+            background: var(--card-dark);
+            border-right: 1px solid #2d3748;
+            padding: 40px 25px;
+            position: fixed;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .sidebar-nav h2 {
+            font-size: 1.4rem;
+            color: #fff;
+            margin-bottom: 50px;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-menu { list-style: none; padding: 0; }
+        .nav-item { margin-bottom: 15px; }
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            padding: 14px 18px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .nav-link:hover {
+            background: rgba(63, 81, 181, 0.1);
+            color: var(--accent-blue);
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 60px;
+            max-width: 1200px;
+        }
+
+        .movie-header {
+            margin-bottom: 50px;
+        }
+
+        .movie-header h1 {
+            font-size: 2.8rem;
+            margin: 0;
+            color: #fff;
+            border-left: 6px solid var(--accent-orange);
+            padding-left: 25px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 45px;
+        }
+
+        .panel {
+            background: var(--card-dark);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        h3 {
+            color: var(--text-dim);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-table { width: 100%; border-collapse: collapse; }
+        .info-table td { padding: 18px 0; border-bottom: 1px solid #2d3748; }
+        .label { color: var(--text-dim); width: 35%; font-size: 0.9rem; }
+        .value { color: #fff; font-weight: 500; }
+
+        .cast-list { display: flex; flex-direction: column; gap: 15px; }
+        .cast-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: var(--surface-light);
+            border-radius: 12px;
+            border-left: 3px solid transparent;
+            transition: 0.3s;
+        }
+        .cast-item:hover { border-left-color: var(--accent-blue); background: #2d324a; }
+        .actor-name { font-weight: bold; color: var(--accent-blue); }
+        .character-name { color: var(--accent-orange); font-size: 0.9rem; font-style: italic; }
+        .category-tag { font-size: 0.7rem; background: #121212; padding: 3px 10px; border-radius: 6px; color: var(--text-dim); margin-left: 10px; }
+
+        .tag-container { display: flex; flex-wrap: wrap; gap: 10px; }
+        .tag {
+            background: #121212;
+            color: var(--text-main);
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            border: 1px solid #2d3748;
+        }
+        .genre-badge {
+            background: var(--accent-blue);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+        }
+
+        .similar-grid { display: flex; flex-direction: column; gap: 15px; }
+        .similar-link {
+            text-decoration: none;
+            background: var(--surface-light);
+            padding: 18px;
+            border-radius: 12px;
+            color: var(--text-main);
+            font-weight: 500;
+            transition: 0.3s;
+            border: 1px solid transparent;
+        }
+        .similar-link:hover { border-color: var(--accent-orange); transform: translateX(5px); }
+
+        .empty-state { color: var(--text-dim); font-style: italic; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar-nav">
+        <h2>🎬 CineExplorer</h2>
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="{% url 'home' %}" class="nav-link">🏠 Dashboard</a></li>
+            <li class="nav-item"><a href="{% url 'movies' %}" class="nav-link">📂 Catalogue</a></li>
+            <li class="nav-item"><a href="{% url 'search' %}" class="nav-link">🔍 Recherche</a></li>
+            <li class="nav-item"><a href="{% url 'stats' %}" class="nav-link">📊 Statistiques</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        
+        <header class="movie-header">
+            <h1>{{ movie.primaryTitle }}</h1>
+        </header>
+
+        <div class="detail-grid">
+            <div class="left-col">
+                <section class="panel">
+                    <h3>📊 Informations Générales</h3>
+                    <table class="info-table">
+                        <tr>
+                            <td class="label">Année de sortie</td>
+                            <td class="value">{{ movie.startYear|default:"Non renseignée" }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Genres</td>
+                            <td class="value">
+                                {% for g in movie_genres %}
+                                    <span class="genre-badge">{{ g }}</span>
+                                {% empty %}
+                                    <span class="empty-state">N/A</span>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="label">Durée totale</td>
+                            <td class="value">
+                                {% if movie.runtimeMinutes %} {{ movie.runtimeMinutes }} min {% else %} <span class="empty-state">Inconnue</span> {% endif %}
+                            </td>
+                        </tr>
+                    </table>
+                </section>
+
+                <section class="panel">
+                    <h3>👥 Casting & Équipe</h3>
+                    <div class="cast-list">
+                        {% for member in cast %}
+                        <div class="cast-item">
+                            <div>
+                                <span class="actor-name">{{ member.name }}</span>
+                                <span class="category-tag">{{ member.category }}</span>
+                            </div>
+                            <div class="character-name">
+                                {% if member.character %}
+                                    {{ member.character }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="empty-state">Aucune donnée de casting.</p>
+                        {% endfor %}
+                    </div>
+                </section>
+            </div>
+
+            <div class="right-col">
+                <section class="panel">
+                    <h3>🌍 Titres Internationaux</h3>
+                    <div class="tag-container">
+                        {% for t in titles %}
+                            <span class="tag"><strong style="color:var(--accent-orange)">{{ t.region|default:"?" }}</strong> {{ t.title }}</span>
+                        {% empty %}
+                            <p class="empty-state">N/A</p>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <h3>🎬 Suggestions</h3>
+                    <div class="similar-grid">
+                        {% for sim in similars %}
+                        <a href="{% url 'movie_detail' sim.mid %}" class="similar-link">
+                            {{ sim.primarytitle|truncatechars:35 }}
+                        </a>
+                        {% empty %}
+                        <p class="empty-state">Aucun film similaire.</p>
+                        {% endfor %}
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>

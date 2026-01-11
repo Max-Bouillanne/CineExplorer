@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>CineExplorer - Analyses</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --bg-dark: #0f111a;
+            --card-dark: #1a1d2b;
+            --surface-light: #25293a;
+            --accent-blue: #3f51b5;
+            --accent-orange: #f39c12;
+            --accent-green: #27ae60;
+            --accent-red: #e74c3c;
+            --text-main: #e2e8f0;
+            --text-dim: #94a3b8;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar-nav {
+            width: var(--sidebar-width);
+            background: var(--card-dark);
+            border-right: 1px solid #2d3748;
+            padding: 40px 25px;
+            position: fixed;
+            height: 100vh;
+            box-sizing: border-box;
+            z-index: 100;
+        }
+
+        .sidebar-nav h2 {
+            font-size: 1.4rem;
+            color: #fff;
+            margin-bottom: 50px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-menu { list-style: none; padding: 0; }
+        .nav-item { margin-bottom: 15px; }
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            padding: 14px 18px;
+            border-radius: 10px;
+            transition: 0.3s;
+        }
+        .nav-link:hover {
+            background: rgba(63, 81, 181, 0.1);
+            color: var(--accent-blue);
+        }
+        .nav-link.active {
+            background: rgba(63, 81, 181, 0.1);
+            color: var(--accent-blue);
+            border-right: 3px solid var(--accent-blue);
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 60px;
+            box-sizing: border-box;
+        }
+
+        .page-header {
+            margin-bottom: 50px;
+            border-left: 6px solid var(--accent-blue);
+            padding-left: 25px;
+        }
+
+        .page-header h1 {
+            font-size: 2.2rem;
+            color: #fff;
+            margin: 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 35px;
+        }
+
+        .chart-card {
+            background: var(--card-dark);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: 1px solid #2d3748;
+        }
+
+        .chart-title {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: left;
+            margin-bottom: 25px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+        canvas {
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar-nav">
+        <h2>🎬 CineExplorer</h2>
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="{% url 'home' %}" class="nav-link">🏠 Dashboard</a></li>
+            <li class="nav-item"><a href="{% url 'movies' %}" class="nav-link">📂 Catalogue</a></li>
+            <li class="nav-item"><a href="{% url 'search' %}" class="nav-link">🔍 Recherche</a></li>
+            <li class="nav-item"><a href="{% url 'stats' %}" class="nav-link active">📊 Statistiques</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        
+        <header class="page-header">
+            <h1>Analyses de Données</h1>
+            <p style="color: var(--text-dim); margin-top: 10px;">Visualisation des tendances cinématographiques.</p>
+        </header>
+
+        <div class="stats-grid">
+            <div class="chart-card">
+                <div class="chart-title"><span class="dot" style="background:var(--accent-blue)"></span> Genres populaires</div>
+                <canvas id="genreChart"></canvas>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-title"><span class="dot" style="background:var(--accent-orange)"></span> Production / Décennie</div>
+                <canvas id="decadeChart"></canvas>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-title"><span class="dot" style="background:var(--accent-green)"></span> Distribution des notes</div>
+                <canvas id="ratingChart"></canvas>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-title"><span class="dot" style="background:var(--accent-red)"></span> Acteurs prolifiques</div>
+                <canvas id="actorChart"></canvas>
+            </div>
+        </div>
+    </main>
+
+<script>
+    Chart.defaults.color = '#94a3b8';
+    Chart.defaults.font.family = "'Inter', 'Segoe UI', sans-serif";
+    Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+
+    const optionsBase = {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+            x: { grid: { display: false } }
+        }
+    };
+
+    new Chart(document.getElementById('genreChart'), {
+        type: 'bar',
+        data: {
+            labels: [{% for g in genres %}"{{ g.label }}",{% endfor %}],
+            datasets: [{
+                data: [{% for g in genres %}{{ g.count }},{% endfor %}],
+                backgroundColor: '#3f51b5',
+                borderRadius: 8
+            }]
+        },
+        options: optionsBase
+    });
+
+    new Chart(document.getElementById('decadeChart'), {
+        type: 'line',
+        data: {
+            labels: [{% for d in decades %}"{{ d.label }}s",{% endfor %}],
+            datasets: [{
+                data: [{% for d in decades %}{{ d.count }},{% endfor %}],
+                borderColor: '#f39c12',
+                backgroundColor: 'rgba(243, 156, 18, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4
+            }]
+        },
+        options: optionsBase
+    });
+
+    new Chart(document.getElementById('ratingChart'), {
+        type: 'bar',
+        data: {
+            labels: [{% for r in ratings %}"{{ r.label }}",{% endfor %}],
+            datasets: [{
+                data: [{% for r in ratings %}{{ r.count }},{% endfor %}],
+                backgroundColor: '#27ae60',
+                borderRadius: 8
+            }]
+        },
+        options: optionsBase
+    });
+
+
+    new Chart(document.getElementById('actorChart'), {
+        type: 'bar',
+        data: {
+            labels: [{% for a in actors %}"{{ a.label }}",{% endfor %}],
+            datasets: [{
+                label: 'Nombre de films',
+                data: [{% for a in actors %}{{ a.count }},{% endfor %}],
+                backgroundColor: '#e74c3c',
+                borderColor: '#e74c3c',
+                borderWidth: 1,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                    ticks: { color: '#94a3b8' }
+                },
+                y: { 
+                    grid: { display: false },
+                    ticks: { color: '#e2e8f0' }
+                }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

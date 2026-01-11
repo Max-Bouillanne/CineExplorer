@@ -1,0 +1,143 @@
+@startuml Schema_Relationnel_3NF
+skinparam linetype poly
+skinparam handwritten false
+skinparam defaultFontName "Arial"
+
+title Diagramme Entité-Relation
+
+' ----------------------------------------------------
+' ENTITÉS PRINCIPALES (Fortes)
+' ----------------------------------------------------
+
+
+entity MOVIE {
+  * mid : OBJECT PK
+  --
+  titleType : OBJECT
+  primaryTitle : OBJECT
+  originalTitle : OBJECT
+  isAdult : INT64
+  startYear : INT64
+  endYear : FLOAT64
+  runtimeMinutes : FLOAT64
+}
+
+entity PERSON {
+  * pid : OBJECT PK
+  --
+  primaryName : OBJECT
+  birthYear : FLOAT64
+  deathYear : FLOAT64
+}
+
+' ----------------------------------------------------
+' ENTITÉS DÉPENDANTES (Faibles/Attributs 1-1)
+' ----------------------------------------------------
+
+entity GENRE {
+  * mid : PK/FK
+  * genre : OBJECT PK
+}
+
+entity RATING {
+  * mid : PK/FK
+  --
+  averageRating : FLOAT64
+  numVotes : INT64
+}
+
+entity EPISODE {
+  * mid : OBJECT PK
+  --
+  parentMid : OBJECT FK
+  seasonNumber : FLOAT64
+  episodeNumber : FLOAT64
+}
+
+' ----------------------------------------------------
+' TABLES DE JONCTION (N-M)
+' ----------------------------------------------------
+
+entity PRINCIPAL {
+  * mid : PK/FK
+  * ordering : INT64 PK
+  --
+  pid : OBJECT FK
+  category : OBJECT
+  job : OBJECT
+}
+
+entity CHARACTER {
+  * mid : PK/FK
+  * pid : PK/FK
+  --
+  name : OBJECT
+}
+
+entity DIRECTOR {
+  * mid : PK/FK
+  * pid : PK/FK
+}
+
+entity WRITER {
+  * mid : PK/FK
+  * pid : PK/FK
+}
+
+entity PROFESSION {
+  * pid : PK/FK
+  * jobName : PK
+}
+
+entity KNOWN_FOR {
+  * pid : PK/FK
+  * mid : PK/FK
+}
+
+entity TITLE {
+  * mid : PK/FK
+  * ordering : INT64 PK
+  --
+  title : OBJECT
+  region : OBJECT
+  language : OBJECT
+  types : OBJECT
+  attributes : OBJECT
+  isOriginalTitle : INT64
+}
+
+' ----------------------------------------------------
+' RELATIONS
+' ----------------------------------------------------
+
+' MOVIE - RATING (1-1)
+MOVIE ||--|| RATING : est_note
+
+' MOVIE - EPISODE (1-N)
+MOVIE ||--o{ EPISODE : contient
+
+' MOVIE - TITLE_ALIAS (1-N)
+MOVIE ||--o{ TITLE : est_nomme
+
+' N-M via tables de jonction
+MOVIE }|--|{ PRINCIPAL : est_realise
+PERSON }|--|{ PRINCIPAL : est_principal
+
+MOVIE }|--|{ CHARACTER : contient
+PERSON }|--|{ CHARACTER : est_joue_par
+
+MOVIE }|--|{ DIRECTOR : est_dirige_par
+PERSON }|--|{ DIRECTOR : dirige
+
+MOVIE }|--|{ WRITER : a_pour_auteur
+PERSON }|--|{ WRITER : est_auteur_de
+
+MOVIE }|--|{ GENRE : appartient
+
+PERSON }|--|{ KNOWN_FOR : est_connu_pour
+MOVIE }|--|{ KNOWN_FOR : a_fait_connaitre
+
+PERSON }|--|{ PROFESSION : est
+
+@enduml
+
